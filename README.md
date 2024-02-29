@@ -1,2 +1,22 @@
-RC DAT Reader
+# RC DAT Reader
+GUI application to read rally comp DAT files and display stage results 
+
+# Python
+You can run the application from the python script. You will need to download the RC_DAT_GUI.py and RC.png files. 
+
+Requirements:
+Python3
+
+Modules:
+tk
+
+Ubuntu 20.04 or 22.04 installation:
+sudo apt-get install python3 python3-pip
+sudo pip3 install tk
+
+# Package Bundle - Windows
+Download RC_DAT_GUI-Win-x86.zip
+
+Extract RC_DAT_GUI.exe and RC.png to the same filder and double click on RC_DAT_GUI.exe to launch the application. 
+
 
