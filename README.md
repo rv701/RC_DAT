@@ -11,7 +11,9 @@ Modules:
 tk
 
 Ubuntu 20.04 or 22.04 installation:
+
 sudo apt-get install python3 python3-pip
+
 sudo pip3 install tk
 
 # Package Bundle - Windows
