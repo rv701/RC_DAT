@@ -54,6 +54,8 @@ def process_file(file_path):
 	penalty_wp = 0
 	chk_index = 0
 	
+	last_wp = ""
+	
 	rider = ""
 	stage = ""
 	
@@ -80,39 +82,99 @@ def process_file(file_path):
 	output_text = ""
 	#output_text = "DES\tTOD      \t\tTIME    \t\tADJ\n"
 	
+	dss_set = False
+	
 	for index in range(1, len(lines)):
 		#print(index, ":", lines[index])
 		
-		if re.search("Show", lines[index]) :
+		if re.search("Show", lines[index]) and re.search("^[a-zA-Z]", lines[index]): # Line contains "Skip" and starts with letter
+			print(lines[index])
+			print("Opened WP")
+			
+			temp = lines[index].split(" ")
+			last_wp = re.sub("^[a-zA-Z]+", "", temp[0]) # Strip leading chars and return number
+			print("LastWP: " + last_wp) # Set last WP for Show/Skip test
+			
 			show+=1
 			total+=1
 			penalty_wp+=10
-		if re.search("Skip", lines[index]) :
+		if re.search("Skip", lines[index]) and not re.search("No Skip", lines[index]) :
+			print(lines[index])
+			print("Skipped WP")
+			
+			temp = lines[index].split(" ")
+			current_wp = re.sub("^[a-zA-Z]+", "", temp[0]) # Strip leading chars and return number
+			
+			if last_wp == current_wp :
+				show-=1
+				total-=1
+				penalty_wp-=10
+				print("CurrentWP: " + last_wp)
+				print("Show WP Credit " + last_wp)
 			skip+=1
 			total+=1
 			penalty_wp+=20
+			last_wp="" # Clear last wp until next WP Opening
 		if re.search("Clear", lines[index]) :
+			#print(lines[index])
+			#print("Cleared WP")
 			clear+=1
 			total+=1
+			last_wp="" # Clear last wp until next WP Opening
 		if re.search("^SSZ", lines[index]) and re.search("Min$", lines[index]):
+			#print(lines[index])
+			#print("Speeding Penalty")
 			penalty_speed += get_speed(lines[index])
 			
 		# Look for time points
+		if re.search("^End:", lines[index]) :
+			print("End Stage Found.")
+			break
+		if re.search("^Rally", lines[index]) and re.search("Cancelled", lines[index]) :
+			print(lines[index])
+			print("Stage Cancelled")
+			
+			# Reset Penalty Counters
+			clear = 0
+			show = 0
+			skip = 0
+			total = 0 
+			penalty_speed = 0
+			penalty_wp = 0
+			chk_index = 0
 		if re.search("^#", lines[index]) :
+			print(lines[index])
 			#output_text += (lines[index]) + "\n"
 			words = re.split('\s+', lines[index])
 			#output_text += "Rider: " + words[0].replace('#','') + "\n"
 			#output_text += "Stage: " + words[1].replace('Stage:','') + "\n"
 			rider = words[0].replace('#','')
 			stage = words[1].replace('Stage:','')
-		if re.search("^DSS", lines[index]) :
-			#print (lines[index])
+		if re.search("^Start", lines[index]):
+			temp = lines[index].split(" ")
+			print(lines[index])
+			if len(temp) >= 2:
+				print(temp[2])
+				#output_text += "DSS:\t" + get_time(lines[index]) + "\n"
+				#time_start = get_time (lines[index])
+				time_start = datetime.strptime(temp[2], '%H:%M:%S')
+				dss_tod = str(temp[2])
+		if re.search("^Reset", lines[index]):
+			temp = lines[index].split(" ")
+			print (lines[index])
 			#output_text += "DSS:\t" + get_time(lines[index]) + "\n"
 			#time_start = get_time (lines[index])
-			time_start = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
-			dss_tod = str(get_time(lines[index]))
-		if re.search("^CKP", lines[index]) :
-			#print (lines[index])
+			#time_start = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
+			#dss_tod = str(get_time(lines[index]))
+			#dss_set = True
+			if len(temp) >= 4:
+				print(temp[3])
+				#output_text += "DSS:\t" + get_time(lines[index]) + "\n"
+				#time_start = get_time (lines[index])
+				time_start = datetime.strptime(temp[3], '%H:%M:%S')
+				dss_tod = str(temp[3])
+		if re.search("^CKP", lines[index]):
+			print (lines[index])
 			time_checkpoint = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
 			time_delta = time_checkpoint - time_start
 			time_change = timedelta(minutes=(penalty_wp + penalty_speed)) 
@@ -133,8 +195,8 @@ def process_file(file_path):
 			
 			chk_note.append("WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed))
 			
-		if re.search("^FSS", lines[index]) :
-			#print (lines[index])
+		if re.search("^FSS", lines[index]):
+			print (lines[index])
 			time_end = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
 			time_delta = time_end - time_start
 			time_change = timedelta(minutes=(penalty_wp + penalty_speed)) 
@@ -179,6 +241,30 @@ def process_file(file_path):
 	ent_stage.set( stage )
 	
 	r1_tod.set( dss_tod )
+	
+	# Clear CKP rows
+	r2_tod.set( "")
+	r2_note.set( "" )
+	r2_time.set( "" )
+	r2_adj.set( "" )
+	r3_tod.set( "")
+	r3_note.set( "" )
+	r3_time.set( "" )
+	r3_adj.set( "" )
+	r4_tod.set( "")
+	r4_note.set( "" )
+	r4_time.set( "" )
+	r4_adj.set( "" )
+	r5_tod.set( "")
+	r5_note.set( "" )
+	r5_time.set( "" )
+	r5_adj.set( "" )
+	r6_tod.set( "")
+	r6_note.set( "" )
+	r6_time.set( "" )
+	r6_adj.set( "" )
+			
+			
 	for index in range(1, len(chk_tod)):
 		#output_text += chk_tod[index] + "\tCKP" + str(index) + ", " + chk_note[index] + "\t" + chk_time[index] + "\t" + chk_adj[index] + "\n"
 		if(index == 1):
@@ -256,10 +342,13 @@ def process_file(file_path):
 			    
 
 
-root = tk.Tk()
+#root = tk.Tk()
+root = tk.Tk(className=' rc dat reader ')
+#root = tk.Tk(screenName=None,  baseName=None,  className='TEST',  useTk=1)
 root.title("RC DAT Reader")
 root.iconphoto(False, PhotoImage(file='RC.png'))
 #root.iconbitmap(r'./RC.ico')
+#root = Tk(className='Testing')
 
 open_button = tk.Button(root, text="Open File", command=open_file_dialog)
 open_button.grid(column=0, row=0, padx=5, pady=5)
