@@ -1,0 +1,47 @@
+ECNR3""""""""".222."3.32.42.252.232333222332=
+"5703:836."/339085352."FUU223.""PC.""""""2."=
+"5703:793."/339084:22."HUU268.""PC.""6;058."=
+
+#14 Stage:CALP1
+Start:03/20/2024  12:36:35
+Rally Cancelled 12:36:54
+
+#103 Stage:CALP1
+Start:03/20/2024  12:40:09
+Continue:
+
+#103 Stage:CALP1
+Start:03/20/2024  13:28:56
+Reset, Power-On
+DSS001 No Skip  13:32:05
+Reset by DSS 13:33:02
+DSS001 Clear  13:33:04 0H0M2S
+End by FSS 14:46:44 1H13M42S
+FSS046 Clear  14:46:44 1H13M42S
+Finish: 03/20/2024  14:46:46 1H13M44S
+WP2/2=0Min
+0 Show=0Min
+0 SZ=0Min
+FN=0Min
+Time:1Hr 13Min 40Sec
+Adj: 1Hr 13Min 40Sec
+End:
+
+#103 Stage:CALP1
+Start:03/21/2024  22:16:24
+Continue:
+
+#103 Stage:CALP1
+Start:03/21/2024  23:09:56
+Reset, Power-On
+Continue:
+
+#103 Stage:CALP1
+Start:03/22/2024  18:00:12
+Reset, Power-On
+Continue:
+
+#103 Stage:CALP1
+Start:03/23/2024  11:21:06
+Reset, Power-On
+Rally Cancelled 11:21:18
