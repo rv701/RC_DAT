@@ -52,6 +52,7 @@ def process_file(file_path):
 
 	penalty_speed = 0
 	penalty_wp = 0
+	penalty_fn = 0
 	chk_index = 0
 	
 	last_wp = ""
@@ -125,6 +126,16 @@ def process_file(file_path):
 			#print(lines[index])
 			#print("Speeding Penalty")
 			penalty_speed += get_speed(lines[index])
+		if re.search("^FN", lines[index]) and re.search("Min", lines[index]):
+			#print(lines[index])
+			temp = lines[index].split(" ")
+			if len(temp) >= 4:
+				#print(temp[0])
+				#print(temp[1])
+				#print(temp[2])
+				#print(temp[3])
+				#print("FN Penalty: " + temp[4])
+				penalty_fn += int(temp[4])
 			
 		# Look for time points
 		if re.search("^End:", lines[index]) :
@@ -142,6 +153,7 @@ def process_file(file_path):
 			penalty_speed = 0
 			penalty_wp = 0
 			chk_index = 0
+			dss_set = False
 		if re.search("^#", lines[index]) :
 			print(lines[index])
 			#output_text += (lines[index]) + "\n"
@@ -153,7 +165,7 @@ def process_file(file_path):
 		if re.search("^Start", lines[index]):
 			temp = lines[index].split(" ")
 			print(lines[index])
-			if len(temp) >= 2:
+			if len(temp) >= 2 and dss_set == False:
 				print(temp[2])
 				#output_text += "DSS:\t" + get_time(lines[index]) + "\n"
 				#time_start = get_time (lines[index])
@@ -166,18 +178,19 @@ def process_file(file_path):
 			#time_start = get_time (lines[index])
 			#time_start = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
 			#dss_tod = str(get_time(lines[index]))
-			#dss_set = True
+			
 			if len(temp) >= 4:
 				print(temp[3])
 				#output_text += "DSS:\t" + get_time(lines[index]) + "\n"
 				#time_start = get_time (lines[index])
 				time_start = datetime.strptime(temp[3], '%H:%M:%S')
 				dss_tod = str(temp[3])
+				dss_set = True
 		if re.search("^CKP", lines[index]):
 			print (lines[index])
 			time_checkpoint = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
 			time_delta = time_checkpoint - time_start
-			time_change = timedelta(minutes=(penalty_wp + penalty_speed)) 
+			time_change = timedelta(minutes=(penalty_fn + penalty_wp + penalty_speed)) 
 			time_adjust = (time_checkpoint - time_start) + time_change
 			#output_text +=  "CKP:\t" + get_time(lines[index]) + "\t\t" + str(time_delta) + "\t\t" + str(time_adjust) + "\n"
 			
@@ -193,15 +206,18 @@ def process_file(file_path):
 				tmp_str = "0" + tmp_str
 			chk_adj.append(tmp_str)
 			
-			chk_note.append("WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed))
+			chk_note.append("FN:" + str(penalty_fn) + ", WP:" + str(penalty_wp) + ", SZ:" + str(penalty_speed))
 			
 		if re.search("^FSS", lines[index]):
 			print (lines[index])
 			time_end = datetime.strptime(get_time (lines[index]), '%H:%M:%S')
 			time_delta = time_end - time_start
-			time_change = timedelta(minutes=(penalty_wp + penalty_speed)) 
+			time_change = timedelta(minutes=(penalty_fn + penalty_wp + penalty_speed)) 
 			time_adjust = (time_end - time_start) + time_change
-			#output_text +=  "FSS:\t" + get_time(lines[index]) + "\t\t" +  str(time_delta) + "\t\t" +  str(time_adjust) + "\n"
+			#print("FSS:\t" + get_time(lines[index]) + "\t\t" +  str(time_delta) + "\t\t" +  str(time_adjust) + "\n")
+			#print( "Time Start: " + str(time_start))
+			#print( "Time End: " + str(time_end))
+			#print( "Time Adjust: " + str(time_adjust))
 			
 			fss_tod = str(get_time(lines[index]))
 			fss_time = str(time_delta)
@@ -210,7 +226,7 @@ def process_file(file_path):
 			fss_adj = str(time_adjust)
 			if ( len(fss_adj) == 7):
 				fss_adj = "0" + fss_adj
-			fss_note = "WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed)
+			fss_note = "FN:" + str(penalty_fn) + ", WP:" + str(penalty_wp) + ", SZ:" + str(penalty_speed)
 			
 
 	
@@ -219,20 +235,26 @@ def process_file(file_path):
 	output_text += "WP Clear: " + str(clear) + "\n"
 	output_text += "WP Total: " + str(total) + "\n"
 	output_text += "WP Penalty: " + str(penalty_wp) + "Min" + "\n"
-	output_text += "\nSpeed Penalty: " + str(penalty_speed) + "Min" + "\n"
-	output_text += "Total Penalty: " + str(penalty_wp + penalty_speed) + "Min" + "\n"
+	output_text += "FN Penalty: " + str(penalty_fn) + "Min" + "\n"
+	output_text += "Speed Penalty: " + str(penalty_speed) + "Min" + "\n"
+	output_text += "\nTotal Penalty: " + str(penalty_fn + penalty_wp + penalty_speed) + "Min" + "\n"
 	
-	#output_text += "\nNote: EOS, WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed) + "\n"
+	#print( "\nNote: EOS, WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed) + "\n")
+	minutes = penalty_wp + penalty_speed
+	#print( "Minutes: " + str(minutes))
 	
-	time_change = timedelta(minutes=(penalty_wp + penalty_speed)) 
+	time_change = timedelta(minutes=(penalty_fn + penalty_wp + penalty_speed)) 
 	time_adjust = (time_end - time_start) + time_change
+	#print( "Time Start: " + str(time_start))
+	#print( "Time End: " + str(time_end))
+	#print( "Time Adjust: " + str(time_adjust))
 	
 	eos_tod = fss_tod
 	eos_time = fss_time
 	eos_adj = str(time_adjust)
 	if ( len(eos_adj) == 7):
 		eos_adj = "0" + eos_adj
-	eos_note = "WPPenalty:" + str(penalty_wp) + ", SZPenalty:" + str(penalty_speed)
+	eos_note = "FN:" + str(penalty_fn) + ", WP:" + str(penalty_wp) + ", SZ:" + str(penalty_speed)
 	
 	#output_text += "\n\n"
 	#output_text += dss_tod + "\tDSS\n"
