@@ -1,5 +1,5 @@
 # RC DAT Reader
-GUI application to read rally comp DAT files and display stage results 
+GUI application to read RC DAT files and display stage results 
 
 # Python
 You can run the application from the python script. You will need to download the RC_DAT_GUI.py and RC.png files. 
